@@ -1,15 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:popupTheme="@style/AppTheme.PopupOverlay"
+        android:paddingRight="15dp"
+        android:background="@color/searchBackground">
+
+        <Button
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:gravity="left|center_vertical"
+            android:textColor="#9c9c9c"
+            android:paddingLeft="15dp"
+            android:background="@drawable/search_button"
+            android:textSize="12dp"
+            android:text="   Lapar?  Mau makan apa hari ini?"
+            android:drawableLeft="@drawable/search" />
+
+
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TAB MAIN"
-        android:textSize="40dp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"
-        android:textAlignment="center" />
+        android:text="Android: Exit/close/hide android Appbar/Toolbar/Actionbar or AppBarLayout along with content/screen scroll"
+        android:textColor="#666" />
+
+            <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android AppBar/Toolbar Tutorial" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android AppBar/Toolbar Tutorial" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Android AppBar/Toolbar Tutorial" />
+
+            <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android AppBar/Toolbar Tutorial" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android AppBar/Toolbar Tutorial" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Android AppBar/Toolbar Tutorial" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Material Design ActionBar/Appbar" />
+
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
 
 </LinearLayout>

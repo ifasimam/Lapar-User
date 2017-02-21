@@ -1,6 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Color Toolbar -->
     <color name="colorPrimary">#e74c3c</color>
     <color name="colorPrimaryDark">#c0392b</color>
     <color name="colorAccent">#ffe761</color>
+        <!-- Search -->
+        <color name="searchBackground">#434343</color>
+
+    <!-- Button Search Color -->
+    <color name="button_default">#fdfdfd</color>
+
+    <!-- Log In/Sign Up Color-->
+    <color name="black">#000000</color>
+    <color name="jet">#222222</color>
+    <color name="oil">#333333</color>
+    <color name="monsoon">#777777</color>
+    <color name="jumbo">#888888</color>
+    <color name="aluminum">#999999</color>
+    <color name="base">#AAAAAA</color>
+    <color name="iron">#CCCCCC</color>
+    <color name="white">#FFFFFF</color>
 </resources>
