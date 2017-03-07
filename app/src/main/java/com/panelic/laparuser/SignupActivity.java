@@ -11,21 +11,37 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.panelic.laparuser.R;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import com.panelic.laparuser.app.AppController;
+import Config.ConstValue;
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import com.panelic.laparuser.helper.SQLiteHandler;
+import com.panelic.laparuser.helper.SessionManager;
 
 public class SignupActivity extends AppCompatActivity {
-    private static final String TAG = "SignupActivity";
 
+    private static final String TAG = SignupActivity.class.getSimpleName();
     @Bind(R.id.input_name) EditText _nameText;
     @Bind(R.id.input_email) EditText _emailText;
     @Bind(R.id.input_mobile) EditText _mobileText;
     @Bind(R.id.input_password) EditText _passwordText;
-    @Bind(R.id.input_reEnterPassword) EditText _reEnterPasswordText;
     @Bind(R.id.btn_signup) Button _signupButton;
     @Bind(R.id.link_login) TextView _loginLink;
+
+    private ProgressDialog pDialog;
+    private SessionManager session;
+    private SQLiteHandler db;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,10 +49,22 @@ public class SignupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_signup);
         ButterKnife.bind(this);
 
+        // Register Button Click event
         _signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signup();
+                String name = _nameText.getText().toString().trim();
+                String email = _emailText.getText().toString().trim();
+                String mobile = _mobileText.getText().toString().trim();
+                String password = _passwordText.getText().toString().trim();
+
+                if (!name.isEmpty() && !email.isEmpty() && !password.isEmpty()) {
+                    registerUser(name, email, mobile, password);
+                } else {
+                    Toast.makeText(getApplicationContext(),
+                            "Please enter your details!", Toast.LENGTH_LONG)
+                            .show();
+                }
             }
         });
 
@@ -50,101 +78,123 @@ public class SignupActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
             }
         });
+
+        // Progress dialog
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+
+        // Session manager
+        session = new SessionManager(getApplicationContext());
+
+        // SQLite database handler
+        db = new SQLiteHandler(getApplicationContext());
+
+        // Check if user is already logged in or not
+        if (session.isLoggedIn()) {
+            // User is already logged in. Take him to main activity
+            Intent intent = new Intent(SignupActivity.this,
+                    MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
-    public void signup() {
-        Log.d(TAG, "Signup");
+    /**
+     * Function to store user in MySQL database will post params(tag, name,
+     * email, password) to register url
+     * */
+    private void registerUser(final String name, final String email, final String mobile,
+                              final String password) {
+        // Tag used to cancel the request
+        String tag_string_req = "req_register";
 
-        if (!validate()) {
-            onSignupFailed();
-            return;
-        }
 
-        _signupButton.setEnabled(false);
 
-        final ProgressDialog progressDialog = new ProgressDialog(SignupActivity.this,
-                R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Creating Account...");
-        progressDialog.show();
+        pDialog.setMessage("Registering ...");
+        showDialog();
 
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String mobile = _mobileText.getText().toString();
-        String password = _passwordText.getText().toString();
-        String reEnterPassword = _reEnterPasswordText.getText().toString();
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                ConstValue.JSON_REGISTER, new Response.Listener<String>() {
 
-        // TODO: Implement your own signup logic here.
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Register Response: " + response.toString());
+                hideDialog();
 
-        new android.os.Handler().postDelayed(
-                new Runnable() {
-                    public void run() {
-                        // On complete call either onSignupSuccess or onSignupFailed
-                        // depending on success
-                        onSignupSuccess();
-                        // onSignupFailed();
-                        progressDialog.dismiss();
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    boolean error = jObj.getBoolean("error");
+                    if (!error) {
+                        // User successfully stored in MySQL
+                        // Now store the user in sqlite
+                        String id = jObj.getString("id");
+
+                        JSONObject user = jObj.getJSONObject("user");
+                        String name = user.getString("name");
+                        String email = user.getString("email");
+                        String mobile = user.getString("mobile");
+                        String created_at = user.getString("created_at");
+
+                        // Inserting row in users table
+                        db.addUser(name, email, mobile, id, created_at);
+
+                        Toast.makeText(getApplicationContext(), "User successfully registered. Try login now!", Toast.LENGTH_LONG).show();
+
+                        // Launch login activity
+                        Intent intent = new Intent(
+                                SignupActivity.this,
+                                LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
                     }
-                }, 3000);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Registration Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+                hideDialog();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("name", name);
+                params.put("email", email);
+                params.put("mobile", mobile);
+                params.put("password", password);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 
-
-    public void onSignupSuccess() {
-        _signupButton.setEnabled(true);
-        setResult(RESULT_OK, null);
-        finish();
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
     }
 
-    public void onSignupFailed() {
-        Toast.makeText(getBaseContext(), "Login failed", Toast.LENGTH_LONG).show();
-
-        _signupButton.setEnabled(true);
-    }
-
-    public boolean validate() {
-        boolean valid = true;
-
-        String name = _nameText.getText().toString();
-        String email = _emailText.getText().toString();
-        String mobile = _mobileText.getText().toString();
-        String password = _passwordText.getText().toString();
-        String reEnterPassword = _reEnterPasswordText.getText().toString();
-
-        if (name.isEmpty() || name.length() < 3) {
-            _nameText.setError("at least 3 characters");
-            valid = false;
-        } else {
-            _nameText.setError(null);
-        }
-
-        if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            _emailText.setError("Enter a valid email address");
-            valid = false;
-        } else {
-            _emailText.setError(null);
-        }
-
-        if (mobile.isEmpty() || mobile.length()!=10) {
-            _mobileText.setError("Enter Valid Mobile Number");
-            valid = false;
-        } else {
-            _mobileText.setError(null);
-        }
-
-        if (password.isEmpty() || password.length() < 4 || password.length() > 10) {
-            _passwordText.setError("between 4 and 10 alphanumeric characters");
-            valid = false;
-        } else {
-            _passwordText.setError(null);
-        }
-
-        if (reEnterPassword.isEmpty() || reEnterPassword.length() < 4 || reEnterPassword.length() > 10 || !(reEnterPassword.equals(password))) {
-            _reEnterPasswordText.setError("Password Do not match");
-            valid = false;
-        } else {
-            _reEnterPasswordText.setError(null);
-        }
-
-        return valid;
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 }

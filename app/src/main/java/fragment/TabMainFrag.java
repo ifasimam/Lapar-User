@@ -1,24 +1,18 @@
-package com.panelic.laparuser.fragment;
+package fragment;
 
-import android.app.Activity;
-import android.view.View.OnClickListener;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
-import com.panelic.laparuser.MainActivity;
 import com.panelic.laparuser.R;
 import com.panelic.laparuser.SearchActivity;
 
-import static android.R.attr.button;
-
 /**
- * Created by Sholihin on 12/02/2017.
+ * Created by Muhammad Sholihin on 12/02/2017.
  * Developer Team : Panelic Studio
  */
 
